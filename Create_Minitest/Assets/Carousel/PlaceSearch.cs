@@ -40,8 +40,7 @@ public class candidate
     public string Formatted_address;
     public geometry Geometry;
     public string Name;
-    public string Place_Id;
-    //public photos Photos;
+    public string Place_id;
 }
 
 [Serializable]
@@ -57,8 +56,8 @@ public class results
     public geometry Geometry;
     public string Id;
     public string Name;
-    //public photos Photos;
-    public string Place_Id;
+    public photos[] Photos;
+    public string Place_id;
     public string Vicinity;
 }
 
@@ -70,3 +69,33 @@ public class PlaceNearyby
     public results[] Results;
 }
 
+[Serializable]
+public class Attributes
+{
+    public string width { get; set; }
+    public string height { get; set; }
+}
+
+[Serializable]
+public class Attributes2
+{
+    public string id { get; set; }
+    public string width { get; set; }
+    public string height { get; set; }
+    public string x { get; set; }
+    public string y { get; set; }
+    public string href { get; set; }
+}
+
+[Serializable]
+public class Image
+{
+    public Attributes2 attributes { get; set; }
+}
+
+[Serializable]
+public class RootObject
+{
+    public Attributes attributes { get; set; }
+    public Image image { get; set; }
+}
