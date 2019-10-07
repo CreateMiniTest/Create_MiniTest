@@ -29,7 +29,7 @@ public class viewport
     public class photos
     {
         public int Height;
-        public string Html_attributions;
+        public string[] Html_attributions;
         public string Photo_reference;
         public int Width;
     }
@@ -40,8 +40,8 @@ public class candidate
     public string Formatted_address;
     public geometry Geometry;
     public string Name;
-    public string PlaceId;
-    public photos Photos;
+    public string Place_Id;
+    //public photos Photos;
 }
 
 [Serializable]
@@ -50,4 +50,23 @@ public class candidate
         public candidate[] Candidates;
     }
 
+
+[Serializable]
+public class results
+{
+    public geometry Geometry;
+    public string Id;
+    public string Name;
+    //public photos Photos;
+    public string Place_Id;
+    public string Vicinity;
+}
+
+[Serializable]
+public class PlaceNearyby
+{
+    public string[] Html_attributions;
+    public string Next_page_token;
+    public results[] Results;
+}
 
