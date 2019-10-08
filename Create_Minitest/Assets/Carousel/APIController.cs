@@ -11,22 +11,22 @@ using UnityEngine.UI;
 
 public class APIController : MonoBehaviour
 {
-    private const string API_KEY = "AIzaSyAjQ1IDr8qj9m8hWKO1VRs1hB9FJC1DibM";
+    private const string API_KEY = "";
     public string Location = "Paul van Ostaijenlaan 12";
     public Texture2D Image;
 
-    private PlaceSearch GetPlaceLocation()
+    public PlaceSearch GetPlaceLocation(string location)
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-            $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={Location}&fields=formatted_address,geometry,name,place_id&inputtype=textquery&key={API_KEY}");
+            $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={location}&fields=formatted_address,geometry,name,place_id&inputtype=textquery&key={API_KEY}");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
-        var place = JsonConvert.DeserializeObject<PlaceSearch>(jsonResponse);
-        return place;
+        var places = JsonConvert.DeserializeObject<PlaceSearch>(jsonResponse);
+        return places;
     }
 
-    private PlaceNearyby GetPlacesNearby(location loc)
+    private PlaceNearyby GetPlacesNearby(location loc, bool isOnlyImagedLocations = false)
     {
         string location = loc.Lat + "," + loc.Lng;
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
@@ -34,13 +34,23 @@ public class APIController : MonoBehaviour
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
-        var place = JsonConvert.DeserializeObject<PlaceNearyby>(jsonResponse);
-        return place;
+        var places = JsonConvert.DeserializeObject<PlaceNearyby>(jsonResponse);
+        
+        if (!isOnlyImagedLocations) return places;
+
+        List<results> imgResults = new List<results>();
+        foreach (var result in places.Results)
+        {
+            if (result.Photos != null)
+                imgResults.Add(result);
+        }
+        places.Results = imgResults.ToArray();
+
+        return places;
     }
 
     private Texture2D GetPlacePhoto(string photoRef)
-    {
-       
+    {      
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
             $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=1920&photoreference={photoRef}&key={API_KEY}");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -50,10 +60,16 @@ public class APIController : MonoBehaviour
         Image.LoadImage(bytes);
         return Image;
     }
+
+    public void PrepareCarrousel(location location)
+    {
+        var near = GetPlacesNearby(location);
+        //near.Results.Length;
+    }
     // Start is called before the first frame update
     void Start()
     {
-        var loc = GetPlaceLocation().Candidates[0].Geometry.Location;
+        var loc = GetPlaceLocation(Location).Candidates[0].Geometry.Location;
         var near = GetPlacesNearby(loc);
 
         var counter = near.Results.Count(results => results.Photos == null);
@@ -62,11 +78,5 @@ public class APIController : MonoBehaviour
             "CmRaAAAAKYMNG1AonRHddLu3s-LzshXvwkegnG-vMP34f2rEwCT4zmLO0ETFxH-r3JX5zzMLadsonBTjA1e4aTKZaTFPyxl6jj_ZwaJb0GOZ2tHuNhksQ9O2d8zAzHtXAy1FrDtBEhBCzNtC8zo57ObvUOy2eAbOGhS69n6sXpjnBSf93iRk4_CzZfFhCA");
 
         print(loc.Lat + ", " + loc.Lng + ": " + near.Results[0].Name + " // images found= " + counter);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

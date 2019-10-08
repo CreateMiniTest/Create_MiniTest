@@ -8,94 +8,64 @@ using System.Threading.Tasks;
 [Serializable]
 public class location
 {
-    public double Lat;
-    public double Lng;
+    public double Lat { get; set; }
+    public double Lng { get; set; }
 }
 
 [Serializable]
 public class viewport
 {
-    public location Northeast;
-    public location Southwest;
+    public location Northeast { get; set; }
+    public location Southwest { get; set; }
 }
 
 [Serializable]
-    public class geometry
-    {
-        public location Location;
-        public viewport Viewport;
-    }
+public class geometry
+{
+    public location Location { get; set; }
+    public viewport Viewport { get; set; }
+}
 [Serializable]
-    public class photos
-    {
-        public int Height;
-        public string[] Html_attributions;
-        public string Photo_reference;
-        public int Width;
-    }
+public class photos
+{
+    public int Height { get; set; }
+    public string[] Html_attributions { get; set; }
+    public string Photo_reference { get; set; }
+    public int Width { get; set; }
+}
 
 [Serializable]
 public class candidate
 {
-    public string Formatted_address;
+    public string Formatted_address { get; set; }
     public geometry Geometry;
-    public string Name;
-    public string Place_id;
+    public string Name { get; set; }
+    public string Place_id { get; set; }
 }
 
 [Serializable]
-    public class PlaceSearch
-    {
-        public candidate[] Candidates;
-    }
+public class PlaceSearch
+{
+    public candidate[] Candidates { get; set; }
+}
 
 
 [Serializable]
 public class results
 {
-    public geometry Geometry;
-    public string Id;
-    public string Name;
-    public photos[] Photos;
-    public string Place_id;
-    public string Vicinity;
+    public geometry Geometry { get; set; }
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public photos[] Photos { get; set; }
+    public string Place_id { get; set; }
+    public string Vicinity { get; set; }
 }
 
 [Serializable]
 public class PlaceNearyby
 {
-    public string[] Html_attributions;
-    public string Next_page_token;
-    public results[] Results;
+    public string[] Html_attributions { get; set; }
+    public string Next_page_token { get; set; }
+    public results[] Results { get; set; }
 }
 
-[Serializable]
-public class Attributes
-{
-    public string width { get; set; }
-    public string height { get; set; }
-}
-
-[Serializable]
-public class Attributes2
-{
-    public string id { get; set; }
-    public string width { get; set; }
-    public string height { get; set; }
-    public string x { get; set; }
-    public string y { get; set; }
-    public string href { get; set; }
-}
-
-[Serializable]
-public class Image
-{
-    public Attributes2 attributes { get; set; }
-}
-
-[Serializable]
-public class RootObject
-{
-    public Attributes attributes { get; set; }
-    public Image image { get; set; }
-}
