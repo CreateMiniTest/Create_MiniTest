@@ -69,14 +69,14 @@ public class APIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var loc = GetPlaceLocation(Location).Candidates[0].Geometry.Location;
-        var near = GetPlacesNearby(loc);
+        //var loc = GetPlaceLocation(Location).Candidates[0].Geometry.Location;
+        //var near = GetPlacesNearby(loc);
 
-        var counter = near.Results.Count(results => results.Photos == null);
+        //var counter = near.Results.Count(results => results.Photos == null);
 
-        GetPlacePhoto(
-            "CmRaAAAAKYMNG1AonRHddLu3s-LzshXvwkegnG-vMP34f2rEwCT4zmLO0ETFxH-r3JX5zzMLadsonBTjA1e4aTKZaTFPyxl6jj_ZwaJb0GOZ2tHuNhksQ9O2d8zAzHtXAy1FrDtBEhBCzNtC8zo57ObvUOy2eAbOGhS69n6sXpjnBSf93iRk4_CzZfFhCA");
+        //GetPlacePhoto(
+        //    "CmRaAAAAKYMNG1AonRHddLu3s-LzshXvwkegnG-vMP34f2rEwCT4zmLO0ETFxH-r3JX5zzMLadsonBTjA1e4aTKZaTFPyxl6jj_ZwaJb0GOZ2tHuNhksQ9O2d8zAzHtXAy1FrDtBEhBCzNtC8zo57ObvUOy2eAbOGhS69n6sXpjnBSf93iRk4_CzZfFhCA");
 
-        print(loc.Lat + ", " + loc.Lng + ": " + near.Results[0].Name + " // images found= " + counter);
+        //print(loc.Lat + ", " + loc.Lng + ": " + near.Results[0].Name + " // images found= " + counter);
     }
 }

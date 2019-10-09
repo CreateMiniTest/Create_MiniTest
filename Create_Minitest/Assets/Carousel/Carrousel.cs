@@ -7,11 +7,13 @@ using UnityEngine;
 public class Carrousel : MonoBehaviour
 {
 
-    private int numberOfImages = 10;
+    public int numberOfImages = 10;
+    public int radius = 20;
+    public float SpriteOrienataion = 0.0f;
     // Start is called before the first frame update
     void Start()
     {
-        buildImages(numberOfImages);
+        buildImages();
     }
 
     // Update is called once per frame
@@ -20,20 +22,28 @@ public class Carrousel : MonoBehaviour
         
     }
 
-    public void buildImages(int amount)
+    public void buildImages()
     {
-        while (this.transform.childCount > 2)
+        this.transform.localPosition = new Vector3(this.transform.position.x, this.transform.position.y, radius);
+
+        while (this.transform.childCount > 0)
         {
             SafeDestroy(this.transform.GetChild(0).gameObject);
         }
-        GameObject proxy = new GameObject("Proxy");
-        proxy.AddComponent<SpriteRenderer>();
-        //proxy.GetComponent<SpriteRenderer>().sprite
 
-        LoadSprite("Carousel/Test_Image");
-        
-        Vector3 pos;
-        var newSprite = Instantiate(proxy);
+        GameObject[] sprites = new GameObject[numberOfImages];
+
+        for (int i = 0; i < numberOfImages; i++)
+        {
+            var newSprite = (GameObject)Instantiate(Resources.Load("Car_Image"));
+            newSprite.transform.parent = this.transform;
+            sprites[i] = newSprite;
+            var angle = (360 / numberOfImages) * (Mathf.PI / 180);
+            float x = radius * Mathf.Sin(i * angle);
+            float y = 0;
+            float z = radius * Mathf.Cos(i * angle);
+            sprites[i].transform.localPosition = new Vector3(x,y,-z);
+        }
     }
 
     public static Sprite LoadSprite(string path)
