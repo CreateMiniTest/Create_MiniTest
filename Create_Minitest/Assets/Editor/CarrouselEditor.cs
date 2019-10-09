@@ -19,7 +19,7 @@ public class CarrouselEditor : Editor
         myTarget.radius = EditorGUILayout.IntSlider(myTarget.radius, 1, 500);
 
         EditorGUILayout.LabelField("Sprite Orientation:");
-        myTarget.SpriteOrienataion = EditorGUILayout.FloatField(myTarget.SpriteOrienataion);
+        myTarget.SpriteOrienataion = EditorGUILayout.Slider(myTarget.SpriteOrienataion, 0.0f, 10.0f);
 
         if (GUILayout.Button("Build"))
         {

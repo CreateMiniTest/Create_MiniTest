@@ -37,6 +37,8 @@ public class Carrousel : MonoBehaviour
         {
             var newSprite = (GameObject)Instantiate(Resources.Load("Car_Image"));
             newSprite.transform.parent = this.transform;
+            newSprite.GetComponent<ImageOrientation>().Orienataion = SpriteOrienataion;
+            newSprite.GetComponent<ImageOrientation>().UpdateOrientation();
             sprites[i] = newSprite;
             var angle = (360 / numberOfImages) * (Mathf.PI / 180);
             float x = radius * Mathf.Sin(i * angle);
@@ -44,6 +46,13 @@ public class Carrousel : MonoBehaviour
             float z = radius * Mathf.Cos(i * angle);
             sprites[i].transform.localPosition = new Vector3(x,y,-z);
         }
+    }
+
+    public static Vector3 PointAroundCircle(float angle, float radius)
+    {
+        Vector3 posVector3 = new Vector3();
+
+        return posVector3;
     }
 
     public static Sprite LoadSprite(string path)

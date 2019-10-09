@@ -11,9 +11,9 @@ using UnityEngine.UI;
 
 public class APIController : MonoBehaviour
 {
-    private const string API_KEY = "";
     public string Location = "Paul van Ostaijenlaan 12";
     public Texture2D Image;
+    public List<string> Types;
 
     public PlaceSearch GetPlaceLocation(string location)
     {
@@ -26,7 +26,7 @@ public class APIController : MonoBehaviour
         return places;
     }
 
-    private PlaceNearyby GetPlacesNearby(location loc, bool isOnlyImagedLocations = false)
+    private PlaceNearyby GetPlacesNearby(location loc, bool sortforImages = false)
     {
         string location = loc.Lat + "," + loc.Lng;
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
@@ -35,15 +35,30 @@ public class APIController : MonoBehaviour
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
         var places = JsonConvert.DeserializeObject<PlaceNearyby>(jsonResponse);
-        
-        if (!isOnlyImagedLocations) return places;
 
-        List<results> imgResults = new List<results>();
+        if (!sortforImages) return places;
+
+        var imgResults = new List<results>();
+        var noimgResults = new List<results>();
         foreach (var result in places.Results)
         {
             if (result.Photos != null)
-                imgResults.Add(result);
+            {
+                if (result.Photos.Length > 0)
+                    imgResults.Add(result);
+                else
+                    noimgResults.Add(result);
+            }
+            else
+            {
+                noimgResults.Add(result);
+            }
         }
+
+        int toAdd = places.Results.Length - imgResults.Count;
+        for (int i = 0; i < toAdd; i++)
+            imgResults.Add(noimgResults[i]);
+
         places.Results = imgResults.ToArray();
 
         return places;
@@ -63,9 +78,20 @@ public class APIController : MonoBehaviour
 
     public void PrepareCarrousel(location location)
     {
-        var near = GetPlacesNearby(location);
+        var places = GetPlacesNearby(location);
+
         //near.Results.Length;
     }
+
+    public void SaveTextureToFile(Texture2D texture, string fileName)
+    {
+        var bytes = texture.EncodeToPNG();
+        var file = File.Open(Application.dataPath + "/" + fileName, FileMode.Create);
+        var binary = new BinaryWriter(file);
+        binary.Write(bytes);
+        file.Close();
+    }
+
     // Start is called before the first frame update
     void Start()
     {

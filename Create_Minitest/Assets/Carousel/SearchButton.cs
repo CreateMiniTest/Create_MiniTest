@@ -17,13 +17,17 @@ namespace Assets.Carousel
            {
                titleText.text = "Vul EERST een locatie naar keuze in:";
            }
-            else if (place.Candidates == null)
+            else if (place.Candidates.Length == 0)
            {
                titleText.text = "Locatie niet gevonden! vul een andere locatie naar keuze in:";
            }
            else
            {
-               apiControl.PrepareCarrousel(place.Candidates[0].Geometry.Location);
+                titleText.text = "Verwerken...:";
+                apiControl.PrepareCarrousel(place.Candidates[0].Geometry.Location);
+
+               this.transform.gameObject.SetActive(false);
+               this.transform.parent.GetChild(0).gameObject.SetActive(false);
            }
 
             
