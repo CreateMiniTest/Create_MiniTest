@@ -7,12 +7,12 @@ using System.Net;
 using System.Text;
 using UnityEngine;
 using Newtonsoft.Json;
+using UnityEditor;
 using UnityEngine.UI;
 
 public class APIController : MonoBehaviour
 {
-    public string Location = "Paul van Ostaijenlaan 12";
-    public Texture2D Image;
+    public string API_KEY = "";
     public List<string> Types;
 
     public PlaceSearch GetPlaceLocation(string location)
@@ -22,6 +22,7 @@ public class APIController : MonoBehaviour
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
+        reader.Close();
         var places = JsonConvert.DeserializeObject<PlaceSearch>(jsonResponse);
         return places;
     }
@@ -34,6 +35,8 @@ public class APIController : MonoBehaviour
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
+        reader.Close();
+        //SaveToJson(jsonResponse, "NearbyPlaces");
         var places = JsonConvert.DeserializeObject<PlaceNearyby>(jsonResponse);
 
         if (!sortforImages) return places;
@@ -70,29 +73,78 @@ public class APIController : MonoBehaviour
             $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=1920&photoreference={photoRef}&key={API_KEY}");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         BinaryReader reader = new BinaryReader(response.GetResponseStream() ?? throw new InvalidOperationException());
-        Image = new Texture2D(2,2);
+        var image = new Texture2D(2,2);
         byte[] bytes = reader.ReadBytes(1 * 1920 * 1080 * 10);
-        Image.LoadImage(bytes);
-        return Image;
+        reader.Close();
+        image.LoadImage(bytes);
+        return image;
     }
 
     public void PrepareCarrousel(location location)
     {
-        var places = GetPlacesNearby(location);
+        var places = GetPlacesNearby(location, true);
+        string serializedData = JsonConvert.SerializeObject(places);
+        SaveToJson(serializedData, "NearbyPlaces");
 
-        //near.Results.Length;
+        var photos = new Texture2D[places.Results.Length];
+        for (int i = 0; i < photos.Length; i++)
+        {
+            if (places.Results[i].Photos == null) continue;
+            
+            photos[i] = GetPlacePhoto(places.Results[i].Photos[0].Photo_reference);
+            SaveTextureToFile(photos[i], i.ToString());
+        }
+
+        var carrousel = this.transform.GetChild(0);
+        carrousel.GetComponent<Carrousel>()._Paused = false;
+        for (int i = 0; i < carrousel.childCount; i++)
+        {
+            if (photos[i] != null)
+                carrousel.GetChild(i).GetComponent<SpriteRenderer>().sprite = Sprite.Create(photos[i], new Rect(0.0f, 0.0f, photos[i].width, photos[i].height), new Vector2(0.5f, 0.5f), 100.0f);
+        }
+        
+        return;
     }
 
-    public void SaveTextureToFile(Texture2D texture, string fileName)
+    public static void SaveTextureToFile(Texture2D texture, string fileName)
     {
         var bytes = texture.EncodeToPNG();
-        var file = File.Open(Application.dataPath + "/" + fileName, FileMode.Create);
+        
+        var file = File.Open(Application.dataPath + "/Resources/" + fileName + ".png", FileMode.Create);
         var binary = new BinaryWriter(file);
         binary.Write(bytes);
+        binary.Close();
         file.Close();
     }
 
-    // Start is called before the first frame update
+    public static Texture2D LoadTextureFromFile(string filename)
+    {
+        Texture2D tex = null;
+
+        if (!File.Exists(Application.dataPath + "/Resources/" + filename + ".png")) return null;
+
+        var fileData = File.ReadAllBytes(Application.dataPath + "/Resources/" + filename + ".png");
+        tex = new Texture2D(2, 2);
+        tex.LoadImage(fileData);
+        return tex;
+    }
+
+    public static void SaveToJson(string data, string filename)
+    {
+        StreamWriter writer = new StreamWriter(Application.dataPath + "/Resources/" + filename + ".json");
+        writer.Write(data);
+        writer.Close();
+    }
+
+    public static string ReadFromJson(string filename)
+    {
+        if (!File.Exists(Application.dataPath + "/Resources/" + filename + ".json")) return null;
+        StreamReader reader = new StreamReader(Application.dataPath + "/Resources/" + filename + ".json");
+        string str = reader.ReadToEnd();
+        reader.Close();
+        return str;
+    }
+
     void Start()
     {
         //var loc = GetPlaceLocation(Location).Candidates[0].Geometry.Location;

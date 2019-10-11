@@ -18,7 +18,7 @@ public class ImageOrientation : MonoBehaviour
 
     public void UpdateOrientation()
     {
-        Orienataion = this.transform.parent.gameObject.GetComponent<Carrousel>().SpriteOrienataion;
+        Orienataion = this.transform.parent.gameObject.GetComponent<Carrousel>()._SpriteOrienataion;
 
         Vector3 fVector3 = new Vector3(this.transform.position.x, this.transform.position.y, Camera.main.transform.position.z);
         Vector3 cVector3 = new Vector3(Camera.main.transform.position.x, this.transform.position.y, Camera.main.transform.position.z);

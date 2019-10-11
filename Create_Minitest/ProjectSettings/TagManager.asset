@@ -6,6 +6,9 @@ TagManager:
   tags:
   - ApiController
   - Background
+  - Carousel
+  - UI
+  - UI_Inspect
   layers:
   - Default
   - TransparentFX

@@ -12,18 +12,18 @@ public class CarrouselEditor : Editor
         DrawDefaultInspector();
 
         EditorGUILayout.LabelField("Number of Images:");
-        myTarget.numberOfImages = EditorGUILayout.IntSlider(myTarget.numberOfImages, 2, 20);
+        myTarget._NumberOfImages = EditorGUILayout.IntSlider(myTarget._NumberOfImages, 2, 20);
 
 
-        EditorGUILayout.LabelField("Carrousel Radius:");
-        myTarget.radius = EditorGUILayout.IntSlider(myTarget.radius, 1, 500);
+        EditorGUILayout.LabelField("Carrousel _Radius:");
+        myTarget._Radius = EditorGUILayout.IntSlider(myTarget._Radius, 1, 500);
 
         EditorGUILayout.LabelField("Sprite Orientation:");
-        myTarget.SpriteOrienataion = EditorGUILayout.Slider(myTarget.SpriteOrienataion, 0.0f, 10.0f);
+        myTarget._SpriteOrienataion = EditorGUILayout.Slider(myTarget._SpriteOrienataion, 0.0f, 10.0f);
 
         if (GUILayout.Button("Build"))
         {
-            myTarget.buildImages();
+            myTarget.BuildImages();
         }
     }
 
