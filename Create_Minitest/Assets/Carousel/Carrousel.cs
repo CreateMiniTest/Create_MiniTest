@@ -10,24 +10,23 @@ public class Carrousel : MonoBehaviour
 {
     enum ScrollDirection { Up, Down, None};
 
-    public int _NumberOfImages = 10;
-    public int _Radius = 20;
-    public float _SpriteOrienataion = 0.0f;
-    
+    public int _NumberOfImages;
+    public int _Radius;
+    public float _SpriteOrienataion;
 
     private bool _isMoving = false;
     private ScrollDirection _scrollDir = ScrollDirection.None;
-    public float _ScrollDelayTime = 0.75f;
-    private float _scrollTimer = 0.0f;
     private Vector3 _RotationStart = new Vector3(0, 0, 0);
     private Vector3 _RotationTarget = new Vector3(0, 0, 0);
 
 
-    public float _TransitionSpeed = 100.0f;
-    public float _ScrollSpeed = 200.0f;
+    public float _TransitionTime;
+    public float _ScrollSpeed;
+    public float _ScrollDelayTime;
+
+    private float _scrollTimer = 0.0f;
     private float _StartTime = 0.0f;
     private float _AngleDistance = 0.0f;
-
     private float _AngleOffset = 0.0f;
 
     public bool _Paused = true;
@@ -35,7 +34,7 @@ public class Carrousel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        BuildImages();
+        SetUp();
     }
 
     // Update is called once per frame
@@ -56,41 +55,79 @@ public class Carrousel : MonoBehaviour
         }
     }
 
-   
+    public static Vector3 PosAroundCircle(float angle, float radius)
+    {
+        float x = radius * Mathf.Sin(angle);
+        float y = 0;                  
+        float z = radius * Mathf.Cos(angle);
+        return new Vector3(x, y, -z);
+    }
 
-    public void BuildImages()
+    public void SetUp()
     {
         _AngleOffset = 360.0f / _NumberOfImages;
 
         transform.localPosition = new Vector3(transform.position.x, transform.position.y, _Radius);
 
-        //while (transform.childCount > 0)
-        //{
-        //    SafeDestroy(transform.GetChild(0).gameObject);
-        //}
+        int count = 0;
+        while (count < 20)
+        {
+            transform.GetChild(count).localPosition = new Vector3(-200,-200,-200);
+            transform.GetChild(count).gameObject.SetActive(false);
+            count++;
+        }
 
-        //GameObject[] sprites = new GameObject[_NumberOfImages];
+        for (int i = 0; i < _NumberOfImages; i++)
+        {
+            var img = transform.GetChild(i).gameObject;
+            img.SetActive(true);
+            img.name = i.ToString();
+            img.transform.localPosition = new Vector3(0, 0, 0);
 
-        //for (int i = 0; i < _NumberOfImages; i++)
-        //{
-        //    var newImg = (GameObject)Instantiate(Resources.Load("Image"));
-        //    newImg.name = i.ToString();
-        //    newImg.transform.parent = transform;
-        //    newImg.GetComponent<ImageOrientation>().Orienataion = _SpriteOrienataion;
-        //    newImg.GetComponent<ImageOrientation>().UpdateOrientation();
-        //    sprites[i] = newImg;
-        //    var angle = _AngleOffset * (Mathf.PI / 180);
-        //    float x = _Radius * Mathf.Sin(i * angle);
-        //    float y = 0;
-        //    float z = _Radius * Mathf.Cos(i * angle);
-        //    sprites[i].transform.localPosition = new Vector3(x,y,-z);
-        //}
+            //Points around the center of the carousel
+            var angle = _AngleOffset * (Mathf.PI / 180);
+            img.transform.localPosition = PosAroundCircle(i * angle, _Radius);
+
+            img.GetComponent<ImageOrientation>().Orienataion = _SpriteOrienataion;
+            img.GetComponent<ImageOrientation>().UpdateOrientation();
+        }
+
+        LerpToClosest();
+    }
+
+    public void BuildImages()
+    {
+        if (!Application.isEditor) return;
+
+        _AngleOffset = 360.0f / _NumberOfImages;
+
+        transform.localPosition = new Vector3(transform.position.x, transform.position.y, _Radius);
+
+        while (transform.childCount > 0)
+        {
+            SafeDestroy(transform.GetChild(0).gameObject);
+        }
+
+        GameObject[] sprites = new GameObject[_NumberOfImages];
+
+        for (int i = 0; i < _NumberOfImages; i++)
+        {
+            sprites[i] = (GameObject)Instantiate(Resources.Load("Image"));
+            sprites[i].name = i.ToString();
+            sprites[i].transform.parent = transform;
+            sprites[i].GetComponent<ImageOrientation>().Orienataion = _SpriteOrienataion;
+            sprites[i].GetComponent<ImageOrientation>().UpdateOrientation();
+            var angle = _AngleOffset * (Mathf.PI / 180);
+            sprites[i].transform.localPosition = PosAroundCircle(i * angle, _Radius);
+        }
     }
 
     public static T SafeDestroy<T>(T obj) where T : Object
     {
-
-        Destroy(obj);
+        if(Application.isEditor)
+            DestroyImmediate(obj);
+        else
+            Destroy(obj);
 
         return null;
     }
@@ -104,7 +141,7 @@ public class Carrousel : MonoBehaviour
 
     public void MoveCarouselToNext(bool isRight = true)
     {
-        if (_isMoving != false) return;
+        if (_isMoving) return;
         if (isRight)
         {
             _RotationTarget.y = _RotationStart.y + _AngleOffset;
@@ -123,16 +160,14 @@ public class Carrousel : MonoBehaviour
     
     public bool LerpToNext()
     {
-        // Distance moved equals elapsed time times speed..
-        float distCovered = (Time.time - _StartTime) * _TransitionSpeed;
+        // Calculate the fraction of the total duration that has passed.
+        float fraction = (Time.time - _StartTime) / _TransitionTime;
 
-        // Fraction of journey completed equals current distance divided by total distance.
         float currAng = transform.localEulerAngles.y;
-        float frctDist = distCovered / _AngleDistance;
         float currDist = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs((_RotationTarget.y > 0.0f ? currAng : currAng - 360)));
 
-        // Set our position as a fraction of the distance between the markers.
-        var toMoveLerp = Vector3.Lerp(_RotationStart, _RotationTarget, frctDist);
+         var toMoveLerp = new Vector3(0, Mathf.SmoothStep(_RotationStart.y, _RotationTarget.y, fraction), 0);
+        //var toMoveLerp = Vector3.Lerp(_RotationStart, _RotationTarget, frctDist);
 
         transform.localEulerAngles = toMoveLerp;
         var isArrived = (currDist <= 0.1f && currDist < _AngleDistance);
@@ -148,7 +183,6 @@ public class Carrousel : MonoBehaviour
         _RotationStart.y = transform.localEulerAngles.y;
 
         return true;
-        
     }
 
     private void MouseScrolling()
@@ -188,9 +222,6 @@ public class Carrousel : MonoBehaviour
         var i = Mathf.RoundToInt(_RotationStart.y / _AngleOffset);
         
         _RotationTarget.y = i * _AngleOffset;
-
-        float currDist = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs(_RotationStart.y));
-
         _StartTime = Time.time;
         _AngleDistance = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs(_RotationStart.y));
         _isMoving = true;

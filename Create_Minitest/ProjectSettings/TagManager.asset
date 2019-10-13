@@ -9,6 +9,7 @@ TagManager:
   - Carousel
   - UI
   - UI_Inspect
+  - UI_Settings
   layers:
   - Default
   - TransparentFX

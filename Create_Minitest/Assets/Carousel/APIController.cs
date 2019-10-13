@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using UnityEngine;
 using Newtonsoft.Json;
-using UnityEditor;
-using UnityEngine.UI;
 
 public class APIController : MonoBehaviour
 {
     public string API_KEY = "";
+    public string Location = "";
     public List<string> Types;
 
     public PlaceSearch GetPlaceLocation(string location)
     {
+        Location = location;
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
             $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={location}&fields=formatted_address,geometry,name,place_id&inputtype=textquery&key={API_KEY}");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -36,7 +33,6 @@ public class APIController : MonoBehaviour
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
         reader.Close();
-        //SaveToJson(jsonResponse, "NearbyPlaces");
         var places = JsonConvert.DeserializeObject<PlaceNearyby>(jsonResponse);
 
         if (!sortforImages) return places;
@@ -95,15 +91,13 @@ public class APIController : MonoBehaviour
             SaveTextureToFile(photos[i], i.ToString());
         }
 
-        var carrousel = this.transform.GetChild(0);
+        var carrousel = transform.GetChild(0);
         carrousel.GetComponent<Carrousel>()._Paused = false;
         for (int i = 0; i < carrousel.childCount; i++)
         {
             if (photos[i] != null)
                 carrousel.GetChild(i).GetComponent<SpriteRenderer>().sprite = Sprite.Create(photos[i], new Rect(0.0f, 0.0f, photos[i].width, photos[i].height), new Vector2(0.5f, 0.5f), 100.0f);
         }
-        
-        return;
     }
 
     public static void SaveTextureToFile(Texture2D texture, string fileName)
@@ -119,12 +113,10 @@ public class APIController : MonoBehaviour
 
     public static Texture2D LoadTextureFromFile(string filename)
     {
-        Texture2D tex = null;
-
         if (!File.Exists(Application.dataPath + "/Resources/" + filename + ".png")) return null;
 
         var fileData = File.ReadAllBytes(Application.dataPath + "/Resources/" + filename + ".png");
-        tex = new Texture2D(2, 2);
+        Texture2D tex = new Texture2D(2, 2);
         tex.LoadImage(fileData);
         return tex;
     }
