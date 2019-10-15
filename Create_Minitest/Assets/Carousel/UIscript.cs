@@ -9,15 +9,16 @@ public class UIscript : MonoBehaviour
 
         private void Start()
         {
+            var ui = transform.GetChild(0);
             if (tag == "UI_Settings")
             {
                 var car = GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>();
-                transform.GetChild(0).GetChild(3).GetComponent<Slider>().value = car._NumberOfImages;
-                transform.GetChild(0).GetChild(3).GetChild(4).GetComponent<Text>().text = car._NumberOfImages.ToString();
-                transform.GetChild(0).GetChild(4).GetComponent<Slider>().value = car._Radius;
-                transform.GetChild(0).GetChild(4).GetChild(4).GetComponent<Text>().text = car._Radius.ToString();
-                transform.GetChild(0).GetChild(5).GetComponent<Slider>().value = car._SpriteOrienataion;
-                transform.GetChild(0).GetChild(5).GetChild(4).GetComponent<Text>().text = car._SpriteOrienataion.ToString(CultureInfo.InvariantCulture);
+                ui.GetChild(3).GetComponent<Slider>().value = car._NumberOfImages;
+                ui.GetChild(3).GetChild(4).GetComponent<Text>().text = car._NumberOfImages.ToString();
+                ui.GetChild(4).GetComponent<Slider>().value = car._Radius;
+                ui.GetChild(4).GetChild(4).GetComponent<Text>().text = car._Radius.ToString();
+                ui.GetChild(5).GetComponent<Slider>().value = car._SpriteOrienataion;
+                ui.GetChild(5).GetChild(4).GetComponent<Text>().text = car._SpriteOrienataion.ToString(CultureInfo.InvariantCulture);
             } 
         }
 
@@ -40,7 +41,7 @@ public class UIscript : MonoBehaviour
            }
            else
            {
-                titleText.text = "Verwerken...:";
+                titleText.text = "Vul een locatie naar keuze in:";
                 apiControl.PrepareCarrousel(place.Candidates[0].Geometry.Location);
 
                transform.gameObject.SetActive(false);
@@ -54,7 +55,7 @@ public class UIscript : MonoBehaviour
             var index = carScript.FowardIndex();
             carScript._Paused = true;
 
-            var inspector = transform.parent.GetChild(5);
+            var inspector = transform.parent.GetChild(6);
             inspector.gameObject.SetActive(true);
             var img = APIController.LoadTextureFromFile(index.ToString());
             if(!img)
@@ -96,23 +97,38 @@ public class UIscript : MonoBehaviour
         public void Slider_Images()
         {
             var val = GetComponent<Slider>().value;
-            GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>()._NumberOfImages = (int)val;
+            var carScript = GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>();
+            carScript.GetComponent<Carrousel>()._NumberOfImages = (int)val;
             transform.GetChild(4).GetComponent<Text>().text = val.ToString(CultureInfo.InvariantCulture);
-            GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>().SetUp();
+            carScript.GetComponent<Carrousel>().SetUp();
         }   
 
         public void Slider_Radius()
         {
             var val = GetComponent<Slider>().value;
-            GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>()._Radius = (int)val;
+            var carScript = GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>();
+            carScript.GetComponent<Carrousel>()._Radius = (int)val;
             transform.GetChild(4).GetComponent<Text>().text = val.ToString(CultureInfo.InvariantCulture);
-            GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>().SetUp();
+            carScript.GetComponent<Carrousel>().SetUp();
         }
 
         public void Slider_Orientation()
         {
             var val = GetComponent<Slider>().value;
-            GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>()._SpriteOrienataion = val;
+            var carScript = GameObject.FindGameObjectsWithTag("Carousel")[0].GetComponent<Carrousel>();
+            carScript.GetComponent<Carrousel>()._SpriteOrienataion = val;
             transform.GetChild(4).GetComponent<Text>().text = val.ToString(CultureInfo.InvariantCulture);
-        }   
+        }
+
+        public void Return()
+        {          
+            var car = GameObject.FindWithTag("Carousel");
+            if (car.GetComponent<Carrousel>()._Paused) Application.Quit();
+            if (!GameObject.FindGameObjectsWithTag("ApiController")[0].GetComponent<APIController>().IsConnected)
+                Application.Quit();
+            car.GetComponent<Carrousel>()._Paused = true;
+            car.transform.rotation = new Quaternion();
+            transform.parent.GetChild(3).gameObject.SetActive(true);
+            transform.parent.GetChild(4).gameObject.SetActive(true);
+        }
 }   
