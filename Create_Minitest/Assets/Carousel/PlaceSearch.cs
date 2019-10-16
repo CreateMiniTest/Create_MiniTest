@@ -8,20 +8,20 @@ public class location
 }
 
 [Serializable]
-public class viewport
+public class Viewport
 {
     public location Northeast { get; set; }
     public location Southwest { get; set; }
 }
 
 [Serializable]
-public class geometry
+public class Geometry
 {
     public location Location { get; set; }
-    public viewport Viewport { get; set; }
+    public Viewport Viewport { get; set; }
 }
 [Serializable]
-public class photos
+public class Photos
 {
     public int Height { get; set; }
     public string[] Html_attributions { get; set; }
@@ -30,10 +30,10 @@ public class photos
 }
 
 [Serializable]
-public class candidate
+public class Candidate
 {
     public string Formatted_address { get; set; }
-    public geometry Geometry;
+    public Geometry Geometry;
     public string Name { get; set; }
     public string Place_id { get; set; }
 }
@@ -41,17 +41,17 @@ public class candidate
 [Serializable]
 public class PlaceSearch
 {
-    public candidate[] Candidates { get; set; }
+    public Candidate[] Candidates { get; set; }
 }
 
 
 [Serializable]
-public class results
+public class Results
 {
-    public geometry Geometry { get; set; }
+    public Geometry Geometry { get; set; }
     public string Id { get; set; }
     public string Name { get; set; }
-    public photos[] Photos { get; set; }
+    public Photos[] Photos { get; set; }
     public string Place_id { get; set; }
     public string Vicinity { get; set; }
 }
@@ -61,6 +61,6 @@ public class PlaceNearyby
 {
     public string[] Html_attributions { get; set; }
     public string Next_page_token { get; set; }
-    public results[] Results { get; set; }
+    public Results[] Results { get; set; }
 }
 

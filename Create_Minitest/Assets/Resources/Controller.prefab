@@ -43,13 +43,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 119e9eb437a20b74d8b83d6f09006771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _NumberOfImages: 20
-  _Radius: 20
-  _SpriteOrienataion: 0
-  _TransitionTime: 1.25
-  _ScrollSpeed: 225
-  _ScrollDelayTime: 0.65
-  _Paused: 1
+  NumberOfImages: 10
+  Radius: 20
+  SpriteOrienataion: 0
+  TransitionTime: 1.25
+  ScrollSpeed: 200
+  ScrollDelayTime: 0.75
+  Paused: 1
 --- !u!1 &3240491899560964650
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,3 +97,4 @@ MonoBehaviour:
   API_KEY: AIzaSyAjQ1IDr8qj9m8hWKO1VRs1hB9FJC1DibM
   Location: 
   Types: []
+  IsConnected: 0

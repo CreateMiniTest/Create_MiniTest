@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,37 +7,31 @@ public class Carrousel : MonoBehaviour
 {
     enum ScrollDirection { Up, Down, None};
 
-    public int _NumberOfImages;
-    public int _Radius;
-    public float _SpriteOrienataion;
+    public int NumberOfImages;
+    public int Radius;
+    public float SpriteOrienataion;
 
-    private bool _isMoving = false;
+    private bool _isMoving;
     private ScrollDirection _scrollDir = ScrollDirection.None;
-    private Vector3 _RotationStart = new Vector3(0, 0, 0);
-    private Vector3 _RotationTarget = new Vector3(0, 0, 0);
+    private Vector3 _rotationStart = new Vector3(0, 0, 0);
+    private Vector3 _rotationTarget = new Vector3(0, 0, 0);
 
 
-    public float _TransitionTime;
-    public float _ScrollSpeed;
-    public float _ScrollDelayTime;
+    public float TransitionTime;
+    public float ScrollSpeed;
+    public float ScrollDelayTime;
 
     private float _scrollTimer = 0.0f;
-    private float _StartTime = 0.0f;
-    private float _AngleDistance = 0.0f;
-    private float _AngleOffset = 0.0f;
+    private float _startTime = 0.0f;
+    private float _angleDistance = 0.0f;
+    private float _angleOffset = 0.0f;
 
-    public bool _Paused = true;
+    public bool Paused = true;
 
     // Start is called before the first frame update
     void Start()
     {
         SetUp();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void OnGUI()
@@ -65,9 +56,9 @@ public class Carrousel : MonoBehaviour
 
     public void SetUp()
     {
-        _AngleOffset = 360.0f / _NumberOfImages;
+        _angleOffset = 360.0f / NumberOfImages;
 
-        transform.localPosition = new Vector3(transform.position.x, transform.position.y, _Radius);
+        transform.localPosition = new Vector3(transform.position.x, transform.position.y, Radius);
 
         int count = 0;
         while (count < 20)
@@ -77,7 +68,7 @@ public class Carrousel : MonoBehaviour
             count++;
         }
 
-        for (int i = 0; i < _NumberOfImages; i++)
+        for (int i = 0; i < NumberOfImages; i++)
         {
             var img = transform.GetChild(i).gameObject;
             img.SetActive(true);
@@ -85,10 +76,10 @@ public class Carrousel : MonoBehaviour
             img.transform.localPosition = new Vector3(0, 0, 0);
 
             //Points around the center of the carousel
-            var angle = _AngleOffset * (Mathf.PI / 180);
-            img.transform.localPosition = PosAroundCircle(i * angle, _Radius);
+            var angle = _angleOffset * (Mathf.PI / 180);
+            img.transform.localPosition = PosAroundCircle(i * angle, Radius);
 
-            img.GetComponent<ImageOrientation>().Orienataion = _SpriteOrienataion;
+            img.GetComponent<ImageOrientation>().Orienataion = SpriteOrienataion;
             img.GetComponent<ImageOrientation>().UpdateOrientation();
         }
 
@@ -99,26 +90,26 @@ public class Carrousel : MonoBehaviour
     {
         if (!Application.isEditor) return;
 
-        _AngleOffset = 360.0f / _NumberOfImages;
+        _angleOffset = 360.0f / NumberOfImages;
 
-        transform.localPosition = new Vector3(transform.position.x, transform.position.y, _Radius);
+        transform.localPosition = new Vector3(transform.position.x, transform.position.y, Radius);
 
         while (transform.childCount > 0)
         {
             SafeDestroy(transform.GetChild(0).gameObject);
         }
 
-        GameObject[] sprites = new GameObject[_NumberOfImages];
+        GameObject[] sprites = new GameObject[NumberOfImages];
 
-        for (int i = 0; i < _NumberOfImages; i++)
+        for (int i = 0; i < NumberOfImages; i++)
         {
             sprites[i] = (GameObject)Instantiate(Resources.Load("Image"));
             sprites[i].name = i.ToString();
             sprites[i].transform.parent = transform;
-            sprites[i].GetComponent<ImageOrientation>().Orienataion = _SpriteOrienataion;
+            sprites[i].GetComponent<ImageOrientation>().Orienataion = SpriteOrienataion;
             sprites[i].GetComponent<ImageOrientation>().UpdateOrientation();
-            var angle = _AngleOffset * (Mathf.PI / 180);
-            sprites[i].transform.localPosition = PosAroundCircle(i * angle, _Radius);
+            var angle = _angleOffset * (Mathf.PI / 180);
+            sprites[i].transform.localPosition = PosAroundCircle(i * angle, Radius);
         }
     }
 
@@ -144,15 +135,15 @@ public class Carrousel : MonoBehaviour
         if (_isMoving) return;
         if (isRight)
         {
-            _RotationTarget.y = _RotationStart.y + _AngleOffset;
+            _rotationTarget.y = _rotationStart.y + _angleOffset;
         }
         else
         {
-            _RotationTarget.y = _RotationStart.y - _AngleOffset;
+            _rotationTarget.y = _rotationStart.y - _angleOffset;
         }
 
-        _StartTime = Time.time;
-        _AngleDistance = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs(_RotationStart.y));
+        _startTime = Time.time;
+        _angleDistance = Mathf.Abs(Mathf.Abs(_rotationTarget.y) - Mathf.Abs(_rotationStart.y));
         _isMoving = true;
 
     }
@@ -160,17 +151,15 @@ public class Carrousel : MonoBehaviour
     
     public bool LerpToNext()
     {
-        // Calculate the fraction of the total duration that has passed.
-        float fraction = (Time.time - _StartTime) / _TransitionTime;
+        float fraction = (Time.time - _startTime) / TransitionTime;
 
         float currAng = transform.localEulerAngles.y;
-        float currDist = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs((_RotationTarget.y > 0.0f ? currAng : currAng - 360)));
+        float currDist = Mathf.Abs(Mathf.Abs(_rotationTarget.y) - Mathf.Abs((_rotationTarget.y > 0.0f ? currAng : currAng - 360)));
 
-         var toMoveLerp = new Vector3(0, Mathf.SmoothStep(_RotationStart.y, _RotationTarget.y, fraction), 0);
-        //var toMoveLerp = Vector3.Lerp(_RotationStart, _RotationTarget, frctDist);
+        var toMoveLerp = new Vector3(0, Mathf.SmoothStep(_rotationStart.y, _rotationTarget.y, fraction), 0);
 
         transform.localEulerAngles = toMoveLerp;
-        var isArrived = (currDist <= 0.1f && currDist < _AngleDistance);
+        var isArrived = (currDist <= 0.1f && currDist < _angleDistance);
         
         if (currDist >= 360)
         {
@@ -180,14 +169,14 @@ public class Carrousel : MonoBehaviour
 
         if (!isArrived) return false;
 
-        _RotationStart.y = transform.localEulerAngles.y;
+        _rotationStart.y = transform.localEulerAngles.y;
 
         return true;
     }
 
     private void MouseScrolling()
     {
-        if (_Paused)
+        if (Paused)
             return;
         var scrollInput = Input.mouseScrollDelta.y;
         if (Math.Abs(scrollInput) > 0.01f)
@@ -195,14 +184,14 @@ public class Carrousel : MonoBehaviour
             _scrollTimer = 0.0f;
             if (scrollInput > 0.0f)
             {
-                _RotationStart.y += Time.deltaTime * _ScrollSpeed;
-                transform.localEulerAngles = _RotationStart;
+                _rotationStart.y += Time.deltaTime * ScrollSpeed;
+                transform.localEulerAngles = _rotationStart;
                 _scrollDir = ScrollDirection.Up;
             }
             else
             {
-                _RotationStart.y -= Time.deltaTime * _ScrollSpeed;
-                transform.localEulerAngles = _RotationStart;
+                _rotationStart.y -= Time.deltaTime * ScrollSpeed;
+                transform.localEulerAngles = _rotationStart;
                 _scrollDir = ScrollDirection.Down;
             }
         }
@@ -210,7 +199,7 @@ public class Carrousel : MonoBehaviour
         {
             if (_scrollDir == ScrollDirection.None || _isMoving) return;
             _scrollTimer += Time.deltaTime;
-            if (!(_scrollTimer >= _ScrollDelayTime)) return;
+            if (!(_scrollTimer >= ScrollDelayTime)) return;
             LerpToClosest();
             _scrollTimer = 0.0f;
             _scrollDir = ScrollDirection.None;
@@ -219,11 +208,11 @@ public class Carrousel : MonoBehaviour
 
     public bool LerpToClosest()
     {
-        var i = Mathf.RoundToInt(_RotationStart.y / _AngleOffset);
+        var i = Mathf.RoundToInt(_rotationStart.y / _angleOffset);
         
-        _RotationTarget.y = i * _AngleOffset;
-        _StartTime = Time.time;
-        _AngleDistance = Mathf.Abs(Mathf.Abs(_RotationTarget.y) - Mathf.Abs(_RotationStart.y));
+        _rotationTarget.y = i * _angleOffset;
+        _startTime = Time.time;
+        _angleDistance = Mathf.Abs(Mathf.Abs(_rotationTarget.y) - Mathf.Abs(_rotationStart.y));
         _isMoving = true;
 
         return false;
@@ -231,8 +220,8 @@ public class Carrousel : MonoBehaviour
 
     public int FowardIndex()
     {
-        if (Mathf.RoundToInt(transform.eulerAngles.y) == 0 && Mathf.RoundToInt(_AngleOffset) == 0) return 0;
-        return (Mathf.RoundToInt(transform.eulerAngles.y) / Mathf.RoundToInt(_AngleOffset)) % _NumberOfImages;
+        if (Mathf.RoundToInt(transform.eulerAngles.y) == 0 && Mathf.RoundToInt(_angleOffset) == 0) return 0;
+        return (Mathf.RoundToInt(transform.eulerAngles.y) / Mathf.RoundToInt(_angleOffset)) % NumberOfImages;
     }
 }
 

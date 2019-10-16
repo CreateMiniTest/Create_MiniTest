@@ -11,8 +11,20 @@ public class APIController : MonoBehaviour
 {
     public string API_KEY = "";
     public string Location = "";
-    public List<string> Types;
+    public string Types = "point_of_interest,establishment,place_of_worship,art_gallery,health,natural_feature,political";
     public bool IsConnected;
+    private Texture2D _noImg;
+
+    private void Start()
+    {
+        _noImg = (Texture2D)Resources.Load("No_Image");
+        StartCoroutine(CheckInternetConnection((isConnected) =>
+        {
+            IsConnected = isConnected;
+            if (!isConnected) PrepareOfflineCarrousel();
+        }));
+    }
+
     public IEnumerator CheckInternetConnection(Action<bool> syncResult)
     {
         const string echoServer = "http://google.com";
@@ -44,7 +56,7 @@ public class APIController : MonoBehaviour
     {
         string location = loc.Lat + "," + loc.Lng;
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-            $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={location}&rankby=distance&type=point_of_interest&fields=geometry,id,name,photos,place_id,vicinity&key={API_KEY}");
+            $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={location}&rankby=distance&type=Types&fields=geometry,id,name,photos,place_id,vicinity&key={API_KEY}");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
@@ -53,8 +65,8 @@ public class APIController : MonoBehaviour
 
         if (!sortforImages) return places;
 
-        var imgResults = new List<results>();
-        var noimgResults = new List<results>();
+        var imgResults = new List<Results>();
+        var noimgResults = new List<Results>();
         foreach (var result in places.Results)
         {
             if (result.Photos != null)
@@ -111,7 +123,7 @@ public class APIController : MonoBehaviour
         {
             var img = LoadTextureFromFile(i.ToString());
             if (!img)
-                img = (Texture2D)Resources.Load("No_Image");
+                img = _noImg;
 
             if (img == null) continue;
 
@@ -126,7 +138,7 @@ public class APIController : MonoBehaviour
                 carrousel.GetChild(i).GetComponent<SpriteRenderer>().sprite = Sprite.Create(photos[i], new Rect(0.0f, 0.0f, photos[i].width, photos[i].height), new Vector2(0.5f, 0.5f), 100.0f);
         }
 
-        carrousel.GetComponent<Carrousel>()._Paused = false;
+        carrousel.GetComponent<Carrousel>().Paused = false;
         ui.transform.GetChild(3).gameObject.SetActive(false);
 
 
@@ -138,6 +150,7 @@ public class APIController : MonoBehaviour
         SaveToJson(serializedData, "NearbyPlaces");
 
         var photos = new Texture2D[places.Results.Length];
+        
         for (int i = 0; i < photos.Length; i++)
         {
             if (places.Results[i].Photos == null) continue;
@@ -147,11 +160,10 @@ public class APIController : MonoBehaviour
         }
 
         var carrousel = transform.GetChild(0);
-        carrousel.GetComponent<Carrousel>()._Paused = false;
+        carrousel.GetComponent<Carrousel>().Paused = false;
         for (int i = 0; i < carrousel.childCount; i++)
         {
-            if (photos[i] != null)
-                carrousel.GetChild(i).GetComponent<SpriteRenderer>().sprite = Sprite.Create(photos[i], new Rect(0.0f, 0.0f, photos[i].width, photos[i].height), new Vector2(0.5f, 0.5f), 100.0f);
+            carrousel.GetChild(i).GetComponent<SpriteRenderer>().sprite = photos[i] != null ? Sprite.Create(photos[i], new Rect(0.0f, 0.0f, photos[i].width, photos[i].height), new Vector2(0.5f, 0.5f), 100.0f) : Sprite.Create(_noImg, new Rect(0.0f, 0.0f, _noImg.width, _noImg.height), new Vector2(0.5f, 0.5f), 100.0f);
         }
 
     }
@@ -191,14 +203,5 @@ public class APIController : MonoBehaviour
         string str = reader.ReadToEnd();
         reader.Close();
         return str;
-    }
-
-    private void Start()
-    {
-        StartCoroutine(CheckInternetConnection((isConnected) =>
-        {
-            IsConnected = isConnected;
-            if (!isConnected) PrepareOfflineCarrousel();
-        }));
-    }
+    } 
 }
